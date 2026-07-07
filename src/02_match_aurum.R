@@ -83,7 +83,6 @@ reconcile_aurum_snomed = function(symptom, aurum_result, params) {
 run_aurum_matching_all_symptoms = function(excel_path, params) {
   aurum_dict = load_aurum_dictionary(params$paths$aurum_dictionary)
   cfg = read_symptom_config(excel_path)
-  cfg = cfg[cfg$symptom %in% c("Hemiparesis", "Bone pain"),] # For testing purposes
   names(cfg)[grepl("^source_a", names(cfg))] <- "source_a_sheet_filter"
   names(cfg)[grepl("^source_b", names(cfg))] <- "source_b_sheet_filter"
 

@@ -33,8 +33,7 @@ data.desc = SNOMED$DESCRIPTION
 data.desc$conceptId = as.character(data.desc$conceptId)
 
 if (isTRUE(params$embeddings$embed_all_descriptions)) {
-  # FSN + all active synonyms (covers the TODO left in the original script:
-  # a synonym can match better than the FSN)
+  # FSN + all active synonyms (a synonym can match better than the FSN)
   data.concepts = data.desc %>% filter(active == 1)
 } else {
   data.concepts = data.desc %>% filter(typeId == "900000000000003001")  # FSN only
@@ -58,10 +57,6 @@ data.concepts.f = data.concepts %>% filter(snomed_cat %in% cat_to_include)
 
 message(sprintf("Corpus to encode: %s descriptions (out of %s total)",
                 nrow(data.concepts.f), nrow(data.desc)))
-
-# For testing purposes
-data.concepts.f = data.concepts.f[1:10000,]
-data.concepts.f$conceptId = as.character(data.concepts.f$conceptId)
 
 # ---- Encoding (to run only once) ----
 corpus_emb = py_to_r(embedder$encode(

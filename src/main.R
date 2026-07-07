@@ -12,6 +12,6 @@ setwd(here::here())  # adapt, or run from the project root
 
 source("src/01_match_snomed.R")   # -> {cache_dir}/snomed_<symptom>.rds
 source("src/02_match_aurum.R")    # -> {cache_dir}/aurum_<symptom>.rds
-# source("src/03_build_embeddings_cache.R")  # uncomment for the first run only
+source("src/03_build_embeddings_cache.R")  # uncomment for the first run only
 source("src/04_match_embeddings_per_symptom.R")  # -> {cache_dir}/missed_<symptom>.rds
 source("src/05_build_output_excel.R")  # -> {output_dir}/<symptom>_codelist.xlsx

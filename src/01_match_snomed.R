@@ -82,7 +82,6 @@ build_symptom_codelist_snomed = function(row, excel_path, SNOMED, params) {
 run_snomed_matching_all_symptoms = function(excel_path, config_path = excel_path, params) {
 
   cfg = read_symptom_config(config_path)
-  cfg = cfg[cfg$symptom %in% c("Hemiparesis", "Bone pain"),] # For testing purposes
   # normalise column names coming from the header 'source_A (sheet, filter)' etc.
   names(cfg)[grepl("^source_a", names(cfg))] = "source_a_sheet_filter"
   names(cfg)[grepl("^source_b", names(cfg))] = "source_b_sheet_filter"

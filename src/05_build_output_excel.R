@@ -17,13 +17,17 @@ message("5. Build output excel for each symptom")
 build_output_for_symptom <- function(symptom, params) {
   slug <- make.names(symptom)
 
-  snomed_file <- file.path(params$paths$cache_dir, paste0("snomed_", slug, ".rds"))
-  aurum_file  <- file.path(params$paths$cache_dir, paste0("aurum_",  slug, ".rds"))
-  missed_file <- file.path(params$paths$cache_dir, paste0("potentially_missed_", slug, ".rds"))
+  snomed_path = file.path(params$paths$cache_dir, "snomed")
+  aurum_path = file.path(params$paths$cache_dir, "aurum")
+  missed_path = file.path(params$paths$cache_dir, "missed")
 
-  snomed_res <- if (file.exists(snomed_file)) readRDS(snomed_file) else NULL
-  aurum_res  <- if (file.exists(aurum_file))  readRDS(aurum_file)  else NULL
-  missed_res <- if (file.exists(missed_file)) readRDS(missed_file) else NULL
+  snomed_file = file.path(snomed_path, paste0("snomed_", slug, ".rds"))
+  aurum_file  = file.path(aurum_path, paste0("aurum_",  slug, ".rds"))
+  missed_file = file.path(missed_path, paste0("potentially_missed_", slug, ".rds"))
+
+  snomed_res = if (file.exists(snomed_file)) readRDS(snomed_file) else NULL
+  aurum_res  = if (file.exists(aurum_file))  readRDS(aurum_file)  else NULL
+  missed_res = if (file.exists(missed_file)) readRDS(missed_file) else NULL
 
   # ---- "codelist regex" sheet: SNOMED + Aurum, source documented row by row ----
   codelist_regex = bind_rows(
@@ -55,5 +59,4 @@ build_output_for_symptom <- function(symptom, params) {
 }
 
 cfg = read_symptom_config(params$paths$input_excel)
-cfg = cfg[cfg$symptom %in% c("Hemiparesis", "Bone pain"),] # For testing purposes
 for (s in cfg$symptom) build_output_for_symptom(s, params)

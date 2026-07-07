@@ -87,7 +87,6 @@ plot_similarity_calibration = function(symptom, sim, params) {
 }
 
 cfg = read_symptom_config(params$paths$input_excel)
-cfg = cfg[cfg$symptom %in% c("Hemiparesis", "Bone pain"),] # For testing purposes
 
 # Create saving folders
 missed_dir = file.path(params$paths$cache_dir, "missed")
