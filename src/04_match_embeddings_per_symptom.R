@@ -11,7 +11,7 @@ library(dplyr)
 library(stringr)
 library(reticulate)
 library(yaml)
-source("R/utils_config.R")
+source("src/utils_config.R")
 
 params = yaml::read_yaml("config/params.yml")
 

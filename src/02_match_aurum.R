@@ -14,7 +14,7 @@
 library(dplyr)
 library(stringr)
 library(yaml)
-source("R/utils_config.R")
+source("src/utils_config.R")
 
 params = yaml::read_yaml("config/params.yml")
 
@@ -106,5 +106,6 @@ run_aurum_matching_all_symptoms = function(excel_path, params) {
 }
 
 if (sys.nframe() == 0) {
+  dir.create(params$paths$output_dir, showWarnings = FALSE, recursive = TRUE)
   run_aurum_matching_all_symptoms(params$paths$input_excel, params)
 }

@@ -10,7 +10,7 @@
 library(Rdiagnosislist)
 library(dplyr)
 library(yaml)
-source("R/utils_config.R")
+source("src/utils_config.R")
 
 params = yaml::read_yaml("config/params.yml")
 
@@ -105,9 +105,7 @@ run_snomed_matching_all_symptoms = function(excel_path, config_path = excel_path
   return(results)
 }
 
-test = run_snomed_matching_all_symptoms(params$paths$input_excel, params=params) 
-test.snomed = readRDS("cache/snomed_Hemiparesis.rds")
-
 if (sys.nframe() == 0) {
+  dir.create(params$paths$output_dir, showWarnings = FALSE, recursive = TRUE)
   run_snomed_matching_all_symptoms(params$paths$input_excel, params = params)
 }
