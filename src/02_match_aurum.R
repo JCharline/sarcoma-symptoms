@@ -106,6 +106,6 @@ run_aurum_matching_all_symptoms = function(excel_path, params) {
 }
 
 if (sys.nframe() == 0) {
-  dir.create(params$paths$output_dir, showWarnings = FALSE, recursive = TRUE)
+  dir.create(params$paths$cache_dir, showWarnings = FALSE, recursive = TRUE)
   run_aurum_matching_all_symptoms(params$paths$input_excel, params)
 }
