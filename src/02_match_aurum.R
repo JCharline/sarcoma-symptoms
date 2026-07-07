@@ -16,6 +16,8 @@ library(stringr)
 library(yaml)
 source("src/utils_config.R")
 
+message("2. Launch Aurum regex matching")
+
 params = yaml::read_yaml("config/params.yml")
 
 load_aurum_dictionary = function(path) {

@@ -12,6 +12,8 @@ library(dplyr)
 library(yaml)
 source("src/utils_config.R")
 
+message("1. Launch SNOMED regex matching")
+
 params = yaml::read_yaml("config/params.yml")
 
 SNOMED = loadSNOMED(params$paths$snomed_releases)

@@ -12,6 +12,8 @@ source("src/utils_config.R")
 
 params <- yaml::read_yaml("config/params.yml")
 
+message("5. Build output excel for each symptom")
+
 build_output_for_symptom <- function(symptom, params) {
   slug <- make.names(symptom)
 

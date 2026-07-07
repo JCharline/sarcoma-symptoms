@@ -16,6 +16,8 @@ source("src/utils_config.R")
 
 params = yaml::read_yaml("config/params.yml")
 
+message("4. Identify potentially missed codes from regex with embeddings.")
+
 use_virtualenv(params$embeddings$python_env, required = TRUE)
 st = import("sentence_transformers")
 embedder = st$SentenceTransformer(params$embeddings$model)

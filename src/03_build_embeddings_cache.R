@@ -16,6 +16,8 @@ library(yaml)
 
 params = yaml::read_yaml("config/params.yml")
 
+message("3. Compute embeddings for the SNOMED corpus - WARNING, can be long.")
+
 # Create a virtual environment (once only)
 #virtualenv_create("st-env")
 #virtualenv_install("st-env", packages = c("sentence-transformers","numpy"))
