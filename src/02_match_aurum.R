@@ -62,7 +62,8 @@ build_symptom_codelist_aurum = function(row, excel_path, aurum_dict) {
 #' Reconciles the Aurum codelist with the SNOMED codelist for the same symptom
 #' (requires 01_match_snomed.R to have already run and cached its .rds)
 reconcile_aurum_snomed = function(symptom, aurum_result, params) {
-  snomed_file = file.path(params$paths$cache_dir, paste0("snomed_", make.names(symptom), ".rds"))
+  snomed_path = file.path(params$paths$cache_dir,"snomed")
+  snomed_file = file.path(snomed_path, paste0("snomed_", make.names(symptom), ".rds"))
   snomed_ids = if (file.exists(snomed_file)) readRDS(snomed_file)$conceptId else integer(0)
 
   aurum_result %>%
@@ -84,6 +85,8 @@ run_aurum_matching_all_symptoms = function(excel_path, params) {
   names(cfg)[grepl("^source_a", names(cfg))] <- "source_a_sheet_filter"
   names(cfg)[grepl("^source_b", names(cfg))] <- "source_b_sheet_filter"
 
+  save_path = file.path(params$paths$cache_dir,"aurum")
+
   results = list()
   for (i in seq_len(nrow(cfg))) {
     row = cfg[i, ]
@@ -97,7 +100,7 @@ run_aurum_matching_all_symptoms = function(excel_path, params) {
     )
     if (!is.null(res)) {
       res = reconcile_aurum_snomed(row$symptom, res, params)
-      out_file = file.path(params$paths$cache_dir, paste0("aurum_", make.names(row$symptom), ".rds"))
+      out_file = file.path(save_path, paste0("aurum_", make.names(row$symptom), ".rds"))
       saveRDS(res, out_file)
       results[[row$symptom]] = res
     }
@@ -106,6 +109,7 @@ run_aurum_matching_all_symptoms = function(excel_path, params) {
 }
 
 if (sys.nframe() == 0) {
-  dir.create(params$paths$cache_dir, showWarnings = FALSE, recursive = TRUE)
+  save_path = file.path(params$paths$cache_dir,"aurum")
+  dir.create(save_path, showWarnings = FALSE, recursive = TRUE)
   run_aurum_matching_all_symptoms(params$paths$input_excel, params)
 }

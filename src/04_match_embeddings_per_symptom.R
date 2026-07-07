@@ -11,6 +11,7 @@ library(dplyr)
 library(stringr)
 library(reticulate)
 library(yaml)
+library(ggplot2)
 source("src/utils_config.R")
 
 params = yaml::read_yaml("config/params.yml")
@@ -52,12 +53,11 @@ compute_symptom_similarity = function(references, corpus_emb, corpus_terms, batc
 
 #' For a given symptom: computes similarity, applies the threshold, and
 #' removes concepts already present in the regex+hierarchy codelist
-find_potentially_missed_codes = function(symptom, references, params, threshold = NULL) {
+find_potentially_missed_codes = function(symptom, sim, params, threshold = NULL) {
   if (is.null(threshold)) threshold = params$embeddings$default_similarity_threshold
 
-  sim = compute_symptom_similarity(references, corpus_emb, corpus_terms)
-
-  snomed_file = file.path(params$paths$cache_dir, paste0("snomed_", make.names(symptom), ".rds"))
+  snomed_path = file.path(params$paths$cache_dir,"snomed")
+  snomed_file = file.path(snomed_path, paste0("snomed_", make.names(symptom), ".rds"))
   already_found = if (file.exists(snomed_file)) readRDS(snomed_file)$conceptId else integer(0)
 
   missed = sim %>%
@@ -73,10 +73,9 @@ find_potentially_missed_codes = function(symptom, references, params, threshold 
 # compares the similarity distribution for concepts already in the codelist
 # vs the rest, to choose/validate the threshold rather than blindly using
 # default_similarity_threshold.
-plot_similarity_calibration = function(symptom, references, params) {
-  library(ggplot2)
-  sim = compute_symptom_similarity(references, corpus_emb, corpus_terms)
-  snomed_file = file.path(params$paths$cache_dir, paste0("snomed_", make.names(symptom), ".rds"))
+plot_similarity_calibration = function(symptom, sim, params) {
+  snomed_path = file.path(params$paths$cache_dir,"snomed")
+  snomed_file = file.path(snomed_path, paste0("snomed_", make.names(symptom), ".rds"))
   already_found = if (file.exists(snomed_file)) readRDS(snomed_file)$conceptId else integer(0)
   sim$already_in_codelist <- sim$conceptId %in% already_found
 
@@ -86,18 +85,36 @@ plot_similarity_calibration = function(symptom, references, params) {
 }
 
 if (sys.nframe() == 0) {
-  cfg <- read_symptom_config(params$paths$input_excel)
+  cfg = read_symptom_config(params$paths$input_excel)
   cfg = cfg[cfg$symptom %in% c("Hemiparesis", "Bone pain"),] # For testing purposes
+
+  # Create saving folders
+  missed_dir = file.path(params$paths$cache_dir, "missed")
+  dir.create(missed_dir, showWarnings = FALSE, recursive = TRUE)
+
+  dir.create(params$paths$output_dir, showWarnings = FALSE, recursive = TRUE)
+  plot_dir = file.path(params$paths$output_dir, "calibration_plots")
+  dir.create(plot_dir, showWarnings = FALSE, recursive = TRUE)
+
   for (i in seq_len(nrow(cfg))) {
-    row <- cfg[i, ]
-    refs <- str_split(row$embedding_references, ",")[[1]] %>% str_trim()
-    refs <- refs[refs != ""]
+    row = cfg[i, ]
+    refs = str_split(row$embedding_references, ",")[[1]] %>% str_trim()
+    refs = refs[refs != ""]
     if (length(refs) == 0) {
       warning(sprintf("No embedding_references provided for '%s' - step skipped.", row$symptom))
       next
     }
     message(sprintf("[Embeddings] %s", row$symptom))
-    missed <- find_potentially_missed_codes(row$symptom, refs, params)
-    saveRDS(missed, file.path(params$paths$cache_dir, paste0("potentially_missed_", make.names(row$symptom), ".rds")))
+    sim = compute_symptom_similarity(refs, corpus_emb, corpus_terms)
+    missed = find_potentially_missed_codes(row$symptom, sim, params)
+    saveRDS(missed, file.path(missed_dir, paste0("potentially_missed_", make.names(row$symptom), ".rds")))
+
+    message(sprintf("[Plot embedding calibration] %s", row$symptom))
+    p = plot_similarity_calibration(row$symptom, sim, params)
+    plot_path = 
+    ggplot2::ggsave(
+        filename = file.path(plot_dir, paste0("calibration_", make.names(row$symptom), ".png")),
+        plot = p, width = 6, height = 4, dpi = 150
+      )
   }
 }

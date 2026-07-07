@@ -85,6 +85,8 @@ run_snomed_matching_all_symptoms = function(excel_path, config_path = excel_path
   names(cfg)[grepl("^source_a", names(cfg))] = "source_a_sheet_filter"
   names(cfg)[grepl("^source_b", names(cfg))] = "source_b_sheet_filter"
 
+  save_path = file.path(params$paths$cache_dir,"snomed")
+
   results = list()
   for (i in seq_len(nrow(cfg))) {
     row = cfg[i, ]
@@ -97,7 +99,7 @@ run_snomed_matching_all_symptoms = function(excel_path, config_path = excel_path
       }
     )
     if (!is.null(res)) {
-      out_file = file.path(params$paths$cache_dir, paste0("snomed_", make.names(row$symptom), ".rds"))
+      out_file = file.path(save_path, paste0("snomed_", make.names(row$symptom), ".rds"))
       saveRDS(res, out_file)
       results[[row$symptom]] = res
     }
@@ -105,7 +107,8 @@ run_snomed_matching_all_symptoms = function(excel_path, config_path = excel_path
   return(results)
 }
 
-# if (sys.nframe() == 0) {
-dir.create(params$paths$cache_dir, showWarnings = FALSE, recursive = TRUE)
-run_snomed_matching_all_symptoms(params$paths$input_excel, params = params)
-# }
+if (sys.nframe() == 0) {
+  save_path = file.path(params$paths$cache_dir,"snomed")
+  dir.create(save_path, showWarnings = FALSE, recursive = TRUE)
+  run_snomed_matching_all_symptoms(params$paths$input_excel, params = params)
+}
