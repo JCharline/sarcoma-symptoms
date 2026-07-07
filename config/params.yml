@@ -1,0 +1,36 @@
+# ============================================================
+# Global parameters - symptom codelists project
+# ============================================================
+
+paths:
+  input_excel: "data/2026_06_25_Symptoms_terms_and_synonyms.xlsx"
+  snomed_releases:
+    - "C:/Users/charl/Documents/UCL/Code/snomed_files/SnomedCT_InternationalRF2_PRODUCTION_20260201T120000Z"
+    - "C:/Users/charl/Documents/UCL/Code/snomed_files/SnomedCT_UKClinicalRF2_PRODUCTION_20260408T000001Z"
+  aurum_dictionary: "C:/Users/charl/Documents/UCL/Documentation/CPRD/CPRD_CodeBrowser_202509_Aurum/CPRDAurumMedical.txt" 
+  snomed_category_include: "cache/snomed_categories.csv"  # semantic tags to keep for embeddings
+  output_dir: "output/20260706_output"
+  cache_dir: "cache/20260706_temp_extracts"
+
+# Pinning the release used is key to reproducibility.
+# Update whenever a source dictionary changes.
+versions:
+  snomed_international: "20260201"
+  snomed_uk: "20260408"
+  aurum_dictionary_version: "CPRD_CodeBrowser_202509_Aurum"
+  codelist_build_date: "20260706"
+  author: "Charline Jean"
+
+embeddings:
+  model: "sentence-transformers/embeddinggemma-300m-medical"
+  python_env: "st-env"
+  batch_size: 128
+  # Default similarity threshold (to be recalibrated sheet by sheet via the diagnostic
+  # step, see R/04_match_embeddings_per_symptom.R)
+  default_similarity_threshold: 0.3
+  # Embed FSN + synonyms (TRUE) or FSN only (FALSE, faster but less coverage)
+  embed_all_descriptions: true
+
+matching:
+  active_only: false   # include inactive concepts (matched then flagged for manual review)
+  include_desc: true    # include descendants (hierarchical closure) per component
