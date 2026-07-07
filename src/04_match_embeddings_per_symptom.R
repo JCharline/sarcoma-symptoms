@@ -86,37 +86,35 @@ plot_similarity_calibration = function(symptom, sim, params) {
     labs(title = paste("Similarity threshold calibration -", symptom))
 }
 
-if (sys.nframe() == 0) {
-  cfg = read_symptom_config(params$paths$input_excel)
-  cfg = cfg[cfg$symptom %in% c("Hemiparesis", "Bone pain"),] # For testing purposes
+cfg = read_symptom_config(params$paths$input_excel)
+cfg = cfg[cfg$symptom %in% c("Hemiparesis", "Bone pain"),] # For testing purposes
 
-  # Create saving folders
-  missed_dir = file.path(params$paths$cache_dir, "missed")
-  dir.create(missed_dir, showWarnings = FALSE, recursive = TRUE)
+# Create saving folders
+missed_dir = file.path(params$paths$cache_dir, "missed")
+dir.create(missed_dir, showWarnings = FALSE, recursive = TRUE)
 
-  dir.create(params$paths$output_dir, showWarnings = FALSE, recursive = TRUE)
-  plot_dir = file.path(params$paths$output_dir, "calibration_plots")
-  dir.create(plot_dir, showWarnings = FALSE, recursive = TRUE)
+dir.create(params$paths$output_dir, showWarnings = FALSE, recursive = TRUE)
+plot_dir = file.path(params$paths$output_dir, "calibration_plots")
+dir.create(plot_dir, showWarnings = FALSE, recursive = TRUE)
 
-  for (i in seq_len(nrow(cfg))) {
-    row = cfg[i, ]
-    refs = str_split(row$embedding_references, ",")[[1]] %>% str_trim()
-    refs = refs[refs != ""]
-    if (length(refs) == 0) {
-      warning(sprintf("No embedding_references provided for '%s' - step skipped.", row$symptom))
-      next
-    }
-    message(sprintf("[Embeddings] %s", row$symptom))
-    sim = compute_symptom_similarity(refs, corpus_emb, corpus_terms)
-    missed = find_potentially_missed_codes(row$symptom, sim, params)
-    saveRDS(missed, file.path(missed_dir, paste0("potentially_missed_", make.names(row$symptom), ".rds")))
-
-    message(sprintf("[Plot embedding calibration] %s", row$symptom))
-    p = plot_similarity_calibration(row$symptom, sim, params)
-    plot_path = 
-    ggplot2::ggsave(
-        filename = file.path(plot_dir, paste0("calibration_", make.names(row$symptom), ".png")),
-        plot = p, width = 6, height = 4, dpi = 150
-      )
+for (i in seq_len(nrow(cfg))) {
+  row = cfg[i, ]
+  refs = str_split(row$embedding_references, ",")[[1]] %>% str_trim()
+  refs = refs[refs != ""]
+  if (length(refs) == 0) {
+    warning(sprintf("No embedding_references provided for '%s' - step skipped.", row$symptom))
+    next
   }
+  message(sprintf("[Embeddings] %s", row$symptom))
+  sim = compute_symptom_similarity(refs, corpus_emb, corpus_terms)
+  missed = find_potentially_missed_codes(row$symptom, sim, params)
+  saveRDS(missed, file.path(missed_dir, paste0("potentially_missed_", make.names(row$symptom), ".rds")))
+
+  message(sprintf("[Plot embedding calibration] %s", row$symptom))
+  p = plot_similarity_calibration(row$symptom, sim, params)
+  plot_path = 
+  ggplot2::ggsave(
+      filename = file.path(plot_dir, paste0("calibration_", make.names(row$symptom), ".png")),
+      plot = p, width = 6, height = 4, dpi = 150
+    )
 }

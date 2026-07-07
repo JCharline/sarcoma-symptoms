@@ -109,8 +109,6 @@ run_snomed_matching_all_symptoms = function(excel_path, config_path = excel_path
   return(results)
 }
 
-if (sys.nframe() == 0) {
-  save_path = file.path(params$paths$cache_dir,"snomed")
-  dir.create(save_path, showWarnings = FALSE, recursive = TRUE)
-  run_snomed_matching_all_symptoms(params$paths$input_excel, params = params)
-}
+save_path = file.path(params$paths$cache_dir,"snomed")
+dir.create(save_path, showWarnings = FALSE, recursive = TRUE)
+run_snomed_matching_all_symptoms(params$paths$input_excel, params = params)

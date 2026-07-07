@@ -54,8 +54,6 @@ build_output_for_symptom <- function(symptom, params) {
   out_path
 }
 
-if (sys.nframe() == 0) {
-  cfg = read_symptom_config(params$paths$input_excel)
-  cfg = cfg[cfg$symptom %in% c("Hemiparesis", "Bone pain"),] # For testing purposes
-  for (s in cfg$symptom) build_output_for_symptom(s, params)
-}
+cfg = read_symptom_config(params$paths$input_excel)
+cfg = cfg[cfg$symptom %in% c("Hemiparesis", "Bone pain"),] # For testing purposes
+for (s in cfg$symptom) build_output_for_symptom(s, params)
