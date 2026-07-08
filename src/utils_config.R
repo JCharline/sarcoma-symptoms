@@ -73,7 +73,7 @@ escape_regex = function(terms) {
 build_regex = function(terms) {
   terms = terms[!is.na(terms) & terms != ""]
   if (length(terms) == 0) return(NA_character_)
-  res = paste(unique(escape_regex(terms)), collapse = "|")
+  res = paste0("(?i)", paste(unique(escape_regex(terms)), collapse = "|"))
   return(res)
 }
 
