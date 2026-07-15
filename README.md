@@ -37,16 +37,3 @@ Each row describes a symptom via:
 - `embedding_references` *(column to fill in)*: short reference phrases used for
   semantic similarity in step 2, comma-separated.
 
-
-## To complete before the first run
-
-- [x] Fix the `terms` → `term` column in the `Joint terms` sheet (or leave the
-      defensive automatic rename, with warning).
-- [ ] Adapt the Aurum dictionary column names in `02_match_aurum.R`
-      (`Term`, `SnomedCTConceptId` assumed — check against your actual extract).
-- [ ] Build `cache/snomed_categories.csv` (semantic tags to include/exclude).
-- [ ] Fill in the `embedding_references` column in `Symptom-config`.
-- [ ] Check the two "Growing lump" rows from the original message (different
-      definitions) and confirm the correct version in `Symptom-config`.
-- [ ] Decide and document `default_similarity_threshold` per symptom if the
-      distribution varies too much from one symptom to another.

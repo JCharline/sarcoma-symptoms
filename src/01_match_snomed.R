@@ -9,6 +9,7 @@
 
 library(Rdiagnosislist)
 library(dplyr)
+library(stringr)
 library(yaml)
 source("src/utils_config.R")
 
@@ -34,44 +35,69 @@ match_component_snomed = function(path, spec, SNOMED, params) {
   )
   if (length(concepts) == 0) return(NULL)
 
-  # result = SNOMEDcodelist(
-  #   concepts,
-  #   include_desc = params$matching$include_desc,
-  #   format = "simple",
-  #   SNOMED = SNOMED
-  # )
-
   return(concepts)
 }
 
 #' Builds the final codelist for one config row (one symptom)
 build_symptom_codelist_snomed = function(row, excel_path, SNOMED, params) {
 
-  concepts_A = match_component_snomed(excel_path, row$source_a_sheet_filter, SNOMED, params)
-  concepts_B = match_component_snomed(excel_path, row$source_b_sheet_filter, SNOMED, params)
+  concepts_A = match_component_snomed(
+    excel_path,
+    row$source_a_sheet_filter,
+    SNOMED,
+    params
+  )
+  concepts_B = match_component_snomed(
+    excel_path,
+    row$source_b_sheet_filter,
+    SNOMED,
+    params
+  )
 
   if (row$mode == "single") {
     result = concepts_B
     matched_via = "single_component"
   } else if (row$mode == "intersect") {
     if (is.null(concepts_A) || is.null(concepts_B)) {
-      warning(sprintf("Symptom '%s': one of the two components matched no concept.", row$symptom))
+      warning(sprintf(
+        "Symptom '%s': one of the two components matched no concept.",
+        row$symptom
+      ))
       return(NULL)
     }
     result = intersect(concepts_A, concepts_B)
     if (length(result) == 0) return(NULL)
-    # final = codelist_B[codelist_B$conceptId %in% shared_ids, ]
     matched_via = "intersect_A_B"
   } else {
     stop(sprintf("Unknown mode in config: '%s'", row$mode))
   }
-  final = SNOMEDcodelist(
+  res_codelist = SNOMEDcodelist(
     result,
     include_desc = params$matching$include_desc,
     format = "simple",
     SNOMED = SNOMED
   )
-  final$conceptId = as.character(final$conceptId)
+
+  # Filter out irrelevant categories to shrink codelist size
+  res_codelist = res_codelist %>%
+    mutate(
+      snomed_cat  = str_extract(term, "\\(([^)]+)\\)\\s*$", group = 1),
+      snomed_term = str_trim(str_remove(term, "\\s*\\([^)]+\\)\\s*$"))
+    )
+  # file to build once manually: list of SNOMED semantic tags with an
+  # include column (0/1)
+  snomed_categories = read.csv(params$paths$snomed_category_include)
+  cat_to_include = snomed_categories$snomed_cat[snomed_categories$include == 1]
+
+  final = res_codelist %>% filter(snomed_cat %in% cat_to_include)
+
+  message(sprintf(
+    "Final codelist after category filtering: %s codes (out of %s total)",
+    nrow(final), nrow(res_codelist)
+  ))
+
+
+  final$conceptId = as.character(res_codelist$conceptId)
   final$symptom = row$symptom
   final$matched_via = matched_via
   final$source = "SNOMED"
@@ -79,7 +105,10 @@ build_symptom_codelist_snomed = function(row, excel_path, SNOMED, params) {
 }
 
 #' Loops over the whole config and exports one intermediate .rds per symptom
-run_snomed_matching_all_symptoms = function(excel_path, config_path = excel_path, params) {
+run_snomed_matching_all_symptoms = function(
+  excel_path,
+  config_path = excel_path,
+  params) {
 
   cfg = read_symptom_config(config_path)
   # normalise column names coming from the header 'source_A (sheet, filter)' etc.
